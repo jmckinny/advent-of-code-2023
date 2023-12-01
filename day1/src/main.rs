@@ -4,6 +4,25 @@ fn main() {
     println!("Part 2: {}", part2(&input));
 }
 
+fn part1(input: &str) -> u32 {
+    input.lines().map(get_number_from_line).sum()
+}
+
+fn get_number_from_line(line: &str) -> u32 {
+    // Find first and last
+    // Note: if nothing found we use 0 since that doesn't impact sum
+    let first = line.chars().find(|c| c.is_ascii_digit()).unwrap_or('0');
+    let last = line
+        .chars()
+        .rev()
+        .find(|c| c.is_ascii_digit())
+        .unwrap_or('0');
+    let mut num_string = String::new();
+    num_string.push(first);
+    num_string.push(last);
+    num_string.parse().unwrap()
+}
+
 fn part2(input: &str) -> u32 {
     input
         .lines()
@@ -11,11 +30,11 @@ fn part2(input: &str) -> u32 {
             let tokens = tokenize(line);
             let first = tokens.first().unwrap();
             let last = tokens.iter().last().unwrap();
-            digits_to_num(*first, *last)
+            digits_to_num(first, last)
         })
         .sum()
 }
-#[derive(Debug, Clone, Copy)]
+
 enum Digit {
     One,
     Two,
@@ -28,19 +47,21 @@ enum Digit {
     Nine,
 }
 
-impl From<char> for Digit {
-    fn from(val: char) -> Self {
-        match val {
-            '1' => Digit::One,
-            '2' => Digit::Two,
-            '3' => Digit::Three,
-            '4' => Digit::Four,
-            '5' => Digit::Five,
-            '6' => Digit::Six,
-            '7' => Digit::Seven,
-            '8' => Digit::Eight,
-            '9' => Digit::Nine,
-            _ => panic!("Unreachable"),
+impl TryInto<Digit> for char {
+    type Error = String;
+
+    fn try_into(self: char) -> Result<Digit, Self::Error> {
+        match self {
+            '1' => Ok(Digit::One),
+            '2' => Ok(Digit::Two),
+            '3' => Ok(Digit::Three),
+            '4' => Ok(Digit::Four),
+            '5' => Ok(Digit::Five),
+            '6' => Ok(Digit::Six),
+            '7' => Ok(Digit::Seven),
+            '8' => Ok(Digit::Eight),
+            '9' => Ok(Digit::Nine),
+            _ => Err(String::from("Invalid Digit")),
         }
     }
 }
@@ -61,7 +82,7 @@ impl ToString for Digit {
     }
 }
 
-fn digits_to_num(a: Digit, b: Digit) -> u32 {
+fn digits_to_num(a: &Digit, b: &Digit) -> u32 {
     let mut first = a.to_string();
     first.push_str(&b.to_string());
     first.parse().unwrap()
@@ -72,10 +93,8 @@ fn tokenize(str: &str) -> Vec<Digit> {
     let mut i = 0;
     while i < str.len() {
         let c = str.chars().nth(i).unwrap();
-        if c.is_ascii_digit() {
-            tokens.push(c.into());
-            i += 1;
-            continue;
+        if let Ok(digit) = c.try_into() {
+            tokens.push(digit)
         }
 
         let slice = &str[i..];
@@ -101,23 +120,6 @@ fn tokenize(str: &str) -> Vec<Digit> {
         i += 1;
     }
     tokens
-}
-
-fn part1(input: &str) -> u32 {
-    input.lines().map(get_number_from_line).sum()
-}
-
-fn get_number_from_line(line: &str) -> u32 {
-    let first = line.chars().find(|c| c.is_ascii_digit()).unwrap_or('0');
-    let last = line
-        .chars()
-        .rev()
-        .find(|c| c.is_ascii_digit())
-        .unwrap_or('0');
-    let mut num_string = String::new();
-    num_string.push(first);
-    num_string.push(last);
-    num_string.parse().unwrap()
 }
 
 fn load_input() -> String {
