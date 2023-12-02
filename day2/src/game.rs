@@ -11,22 +11,13 @@ impl Game {
         self.id
     }
 
-    pub fn get_handfuls(&self) -> &[Handful] {
-        &self.handfuls
-    }
-
-    pub fn get_handful_mut(&mut self) -> &mut [Handful] {
-        &mut self.handfuls
-    }
-
-    pub fn get_max_color_count(&self, color: &str) -> u32 {
+    pub fn get_max_color_count(&self, color: Color) -> u32 {
         self.handfuls
             .iter()
             .map(|handful| match color {
-                "red" => handful.red,
-                "blue" => handful.blue,
-                "green" => handful.green,
-                _ => panic!("Unreachable"),
+                Color::Red => handful.red,
+                Color::Blue => handful.blue,
+                Color::Green => handful.green,
             })
             .max()
             .unwrap_or(0) // Sometimes there are none of a color
@@ -75,4 +66,10 @@ pub struct Handful {
     red: u32,
     green: u32,
     blue: u32,
+}
+
+pub enum Color {
+    Red,
+    Blue,
+    Green,
 }
