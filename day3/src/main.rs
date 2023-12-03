@@ -90,7 +90,7 @@ fn get_gear_ratio(input: &Vec<Vec<char>>, x: usize, y: usize) -> u32 {
             }
             if let Some(char) = row.get(x_coord as usize) {
                 if char.is_ascii_digit() {
-                    if let Some(ratio) = get_number(
+                    if let Some(ratio) = get_unseen_number(
                         input,
                         x_coord as usize,
                         y_coord as usize,
@@ -103,7 +103,7 @@ fn get_gear_ratio(input: &Vec<Vec<char>>, x: usize, y: usize) -> u32 {
             }
         }
     }
-
+    // A valid gear ratio has exactly two part numbers
     if numbers_got != 2 {
         return 0;
     }
@@ -111,8 +111,8 @@ fn get_gear_ratio(input: &Vec<Vec<char>>, x: usize, y: usize) -> u32 {
     gear_ratio
 }
 
-fn get_number(
-    input: &Vec<Vec<char>>,
+fn get_unseen_number(
+    input: &[Vec<char>],
     x: usize,
     y: usize,
     seen: &mut HashSet<(usize, usize)>,
@@ -120,6 +120,8 @@ fn get_number(
     let mut numbers = VecDeque::new();
     // Forward
     for i in x..input[y].len() {
+        // If we already have seen this digit then
+        // number must already have been used
         if seen.contains(&(i, y)) {
             return None;
         }
@@ -131,8 +133,10 @@ fn get_number(
             break;
         }
     }
-
+    // Backwards
     for i in (0..x).rev() {
+        // If we already have seen this digit then
+        // number must already have been used
         if seen.contains(&(i, y)) {
             return None;
         }
@@ -271,39 +275,39 @@ mod test {
         let parsed_input = parse_input(&input);
         assert_eq!(
             Some(467),
-            get_number(&parsed_input, 0, 0, &mut HashSet::new())
+            get_unseen_number(&parsed_input, 0, 0, &mut HashSet::new())
         );
         assert_eq!(
             Some(467),
-            get_number(&parsed_input, 1, 0, &mut HashSet::new())
+            get_unseen_number(&parsed_input, 1, 0, &mut HashSet::new())
         );
         assert_eq!(
             Some(467),
-            get_number(&parsed_input, 2, 0, &mut HashSet::new())
+            get_unseen_number(&parsed_input, 2, 0, &mut HashSet::new())
         );
         assert_eq!(
             Some(35),
-            get_number(&parsed_input, 2, 2, &mut HashSet::new())
+            get_unseen_number(&parsed_input, 2, 2, &mut HashSet::new())
         );
         assert_eq!(
             Some(35),
-            get_number(&parsed_input, 3, 2, &mut HashSet::new())
+            get_unseen_number(&parsed_input, 3, 2, &mut HashSet::new())
         );
         assert_eq!(
             Some(664),
-            get_number(&parsed_input, 1, 9, &mut HashSet::new())
+            get_unseen_number(&parsed_input, 1, 9, &mut HashSet::new())
         );
         assert_eq!(
             Some(664),
-            get_number(&parsed_input, 2, 9, &mut HashSet::new())
+            get_unseen_number(&parsed_input, 2, 9, &mut HashSet::new())
         );
         assert_eq!(
             Some(664),
-            get_number(&parsed_input, 3, 9, &mut HashSet::new())
+            get_unseen_number(&parsed_input, 3, 9, &mut HashSet::new())
         );
         assert_eq!(
             Some(598),
-            get_number(&parsed_input, 5, 9, &mut HashSet::new())
+            get_unseen_number(&parsed_input, 5, 9, &mut HashSet::new())
         );
     }
 }
