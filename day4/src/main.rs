@@ -13,7 +13,7 @@ fn part1(cards: &[Card]) -> u32 {
     cards.iter().map(|card| card.get_point_value()).sum()
 }
 
-fn part2(cards: &Vec<Card>) -> u32 {
+fn part2(cards: &[Card]) -> u32 {
     let mut copies: HashMap<u32, u32> = HashMap::new();
     for card in cards {
         let point_value = card.get_matches();
