@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 pub type Seed = u64;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Almanac {
     pub seeds: Vec<Seed>,
     pub maps: Vec<Map>,
@@ -25,7 +25,7 @@ impl Almanac {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Map {
     from: String,
     to: String,
@@ -73,7 +73,7 @@ impl FromStr for Map {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MapEntry {
     pub destination_range_start: u64,
     pub source_range_start: u64,

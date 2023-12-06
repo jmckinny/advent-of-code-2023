@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, Mutex};
 
 use maps::Almanac;
 
@@ -31,16 +31,14 @@ fn part2(data: Almanac) -> u64 {
     }
 
     let min_location = Arc::new(Mutex::new(u64::MAX));
-    let almanac_data = Arc::new(RwLock::new(data));
     let mut thread_handles = Vec::new();
 
     for range in seed_ranges.into_iter() {
         let min_location_copy = min_location.clone();
-        let data_copy = almanac_data.clone();
+        let data_copy = data.clone();
         let handle = std::thread::spawn(move || {
             for seed in range {
-                let almanc_handle = data_copy.read().unwrap();
-                let location = almanc_handle.get_location(seed);
+                let location = data_copy.get_location(seed);
                 let mut location_handle = min_location_copy.lock().unwrap();
                 *location_handle = location_handle.min(location);
             }
