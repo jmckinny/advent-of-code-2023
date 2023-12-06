@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io::Write};
+use std::sync::{Arc, Mutex, RwLock};
 
 use maps::Almanac;
 
@@ -7,7 +7,7 @@ fn main() {
     let input = read_input();
     let data = parse_input(&input);
     println!("Part 1: {}", part1(&data));
-    println!("Part 2: {}", part2(&data));
+    println!("Part 2: {}", part2(data));
 }
 
 fn part1(data: &Almanac) -> u64 {
@@ -20,26 +20,40 @@ fn part1(data: &Almanac) -> u64 {
     locations.into_iter().min().unwrap()
 }
 
-fn part2(data: &Almanac) -> u64 {
-    let mut lowest_location = u64::MAX;
+fn part2(data: Almanac) -> u64 {
     // Get seed pairs
     let mut seeds = data.seeds.iter();
     let mut seed_ranges = Vec::new();
-    if let Some(start) = seeds.next() {
+    while let Some(start) = seeds.next() {
         if let Some(range) = seeds.next() {
             seed_ranges.push((*start)..(*start + *range));
         }
     }
 
+    let min_location = Arc::new(Mutex::new(u64::MAX));
+    let almanac_data = Arc::new(RwLock::new(data));
+    let mut thread_handles = Vec::new();
+
     for range in seed_ranges.into_iter() {
-        println!("Range {:?}", range);
-        for seed in range {
-            let location = data.get_location(seed);
-            lowest_location = lowest_location.min(location);
-        }
+        let min_location_copy = min_location.clone();
+        let data_copy = almanac_data.clone();
+        let handle = std::thread::spawn(move || {
+            for seed in range {
+                let almanc_handle = data_copy.read().unwrap();
+                let location = almanc_handle.get_location(seed);
+                let mut location_handle = min_location_copy.lock().unwrap();
+                *location_handle = location_handle.min(location);
+            }
+        });
+        thread_handles.push(handle);
     }
 
-    lowest_location
+    for handle in thread_handles {
+        handle.join().unwrap();
+    }
+
+    let result = *min_location.lock().unwrap();
+    result
 }
 
 fn parse_input(input: &str) -> Almanac {
@@ -97,7 +111,7 @@ humidity-to-location map:
     #[test]
     fn test_part2() {
         let data = parse_input(SAMPLE_INPUT);
-        assert_eq!(46, part2(&data));
+        assert_eq!(46, part2(data));
     }
 
     #[test]
